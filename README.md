@@ -1,107 +1,91 @@
-# Electronic Health Record Blockchain Based Platfrom - Project
+# 🚀 Supply Chain Blockchain System using MultiChain
 
-## Tech stack
+This project demonstrates a simple blockchain-based supply chain tracking system built using **MultiChain**, **Node.js**, and **Express**. It allows you to publish and fetch product shipment details on a private blockchain.
 
-    - Hyperledger Fabric blockchain (Node SDK JavaScript)
-    - Node.js
-    - Next.js
-    - IPFS
+## 📦 Features
 
-<!-- ADD github access 
+- Publish supply chain updates to a MultiChain stream
+- Retrieve transaction history for product updates
+- RESTful API interface via Express
+- JSON-formatted responses
+- Uses `.env` for secure credential management
 
-$ eval "$(ssh-agent -s)"
-$ ssh-add ~/ssh/github -->
+## 🛠 Tech Stack
 
-# Steps to setup project
+- 🧱 Blockchain: MultiChain
+- 🔗 Backend: Node.js + Express
+- 🔒 Authentication: Basic Auth via RPC credentials
+- 🌐 API: REST (JSON)
+- 🔧 Tools: dotenv, axios, body-parser, cors
 
-## Download fabric binarys and fabric sample repo
+## 📁 Directory Structure
 
-    $ ./install-fabric.sh 
+```
+.
+├── index.js          # Main Express server
+├── .env              # Environment variables (ignored by git)
+├── .gitignore        # Git ignore rules
+├── README.md         # This file
+```
 
-## To test network 
+## ⚙️ Setup Instructions
 
-    $ cd /fabric-samples/test-network
-    $ ./network.sh up
+### 1. Clone the repository
 
-    $ docker ps    // to check running container or check in docker desktop
-    
-    $ ./network.sh down     // to down network
+```bash
+git clone https://github.com/rohan-mn/supplyChain.git
+cd supplyChain
+```
 
-## to run network with ca and create mychannel 
+### 2. Install dependencies
 
-    $ cd fabric-samples/test-network
-    
-    Create network with ca cert: 
-    
-    $ ./network.sh up createChannel -ca -s couchdb
-    
-### Chain code deployment command
+```bash
+npm install
+```
 
-- Deploy chain code
-	    
-    $ ./network.sh deployCC -ccn ehrChainCode -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript
+### 3. Create a .env file
 
-    *Down Network - only if you want to stop network or close system
-	
-    $ ./network.sh down
+```env
+RPC_USER=your_multichain_user
+RPC_PASSWORD=your_rpc_password
+RPC_PORT=8367
+CHAIN_NAME=supplychain
+```
 
-### Register Admin
+> ⚠️ Important: Do not commit your `.env` file to GitHub.
 
-    $ cd server-node-sdk/
-    $ node cert-script/registerOrg1Admin.js
-    $ node cert-script/registerOrg2Admin.js
+### 4. Start the server
 
-### onboard script
-    
-    $ node cert-script/onboardHospital01.js 
-    $ node cert-script/onboardDoctor.js
+```bash
+node index.js
+```
 
-    $ node cert-script/onboardInsuranceCompany.js 
-    $ node cert-script/onboardInsuranceAgent.js
+## 📡 API Endpoints
 
-    *** you can use script to call chaincode and perform read and write opration on blockchain ledger. - optional *** 
+| Method | Endpoint        | Description                       |
+|--------|------------------|-----------------------------------|
+| GET    | `/getChainInfo`  | Get general blockchain info       |
+| GET    | `/getAddress`    | Get the first wallet address      |
+| POST   | `/publish`       | Publish product info to blockchain |
+| GET    | `/fetch`         | Fetch all stream entries          |
 
-### start node server to use api
+## 🧪 Sample curl Test
 
-    $ npm run dev
+```bash
+curl -X POST http://localhost:3000/publish \
+  -H "Content-Type: application/json" \
+  -d '{"productId": "P123", "details": "Shipped from Pune to Mumbai"}'
+```
 
-### API List
-    
-    1. registerPatient - as Patient
-    2. loginPatient - as Patient
-    3. grantAccess - to doctor from Patient
-    4. addRecord - of Patient
-    5. getRecordById - of Patient 
-    6. getAllRecordByPatienId - filter record by patient
-    7. fetchLedger - fetch all transaction only admin can fetch.
+## 🧾 Sample JSON Response (GET /fetch)
 
-## chaincode logic
-
-    - lets first understand the actors in our chaincode
-
-    1. Goverment - network owner
-    2. Hospital - Network orgination 
-    3. Practicing physician / Doctor - member of hospital
-    4. Diagnostics center - org OR peer of hospital
-    5. Pharmacies - Org OR peer of hospital
-    6. Researchers / R&D - org
-    7. Insurance companies - org
-    8. Patient - end user
-
-
-   ## now lets see there read write access
-
-        1. Goverment - network owner - admin access
-        2. Hospital - Network orgination - Read/Write (doctor data)
-        3. Practicing physician/Doctor - Read/Write (Patient data w.r.t to hospital)
-        4. Diagnostics center - Read/Write (Patient records w.r.t to diagnostics center)
-        5. Pharmacies - Read/Write (Patient prescriptions w.r.t to pharma center)
-        6. Researchers / R&D - Read data of hospital conect, pateint based on consent. 
-        7. Insurance companies - Read/Write (Patient claims)
-        8. Patient - Read/Write (All generated patient data)
-
-  ## object strucutre in db.
-
-  [ "recordType"="hospital", "createdBy"="hospitalId", data={ name="ABC Hosptial", address="acb location"  } ]
-
-  [ "recordType"="physician", "createdBy"="physicianID", data={ name="ABC Hosptial", address="acb location"  } ]
+```json
+[
+  {
+    "key": "P123",
+    "data": "Shipped from Pune to Mumbai",
+    "txid": "ef9d1b6f96f594bf9ffeeac424bfa0dad6bd3bcfce6ca361c063b5a9ad414209",
+    "blocktime": 1753867977
+  }
+]
+```
