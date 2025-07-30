@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Supply Chain Blockchain Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      margin-top: 40px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .card {
+      margin-bottom: 30px;
+    }
+    #output {
+      white-space: pre-wrap;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📦 Supply Chain Blockchain Viewer</h1>
+
+  <!-- Blockchain Info -->
+  <div class="card p-4 shadow-sm">
+    <h4>🔗 Blockchain Info</h4>
+    <div class="mb-3">
+      <button class="btn btn-primary me-2" onclick="getChainInfo()">Get Chain Info</button>
+      <button class="btn btn-secondary" onclick="getAddress()">Get My Address</button>
+    </div>
+  </div>
+
+  <!-- Publish Product -->
+  <div class="card p-4 shadow-sm">
+    <h4>📤 Publish Product to Blockchain</h4>
+    <div class="row mb-3">
+      <div class="col-md-5">
+        <input type="text" id="product-id" class="form-control" placeholder="Product ID">
+      </div>
+      <div class="col-md-5">
+        <input type="text" id="product-details" class="form-control" placeholder="Product Details">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-success w-100" onclick="publishProduct()">Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stream Data -->
+  <div class="card p-4 shadow-sm">
+    <h4>📥 Stream Data</h4>
+    <button class="btn btn-info" onclick="fetchStreamItems()">Fetch Stream Items</button>
+  </div>
+
+  <!-- Output -->
+  <div class="card p-4 shadow-sm">
+    <h4>🖨️ Output</h4>
+    <div id="output"></div>
+  </div>
+</div>
+
+<!-- JS Scripts -->
+<script>
+  async function getChainInfo() {
+    const res = await fetch("http://localhost:3000/getChainInfo");
+    const data = await res.json();
+    document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+  }
+
+  async function getAddress() {
+    const res = await fetch("http://localhost:3000/getAddress");
+    const data = await res.json();
+    document.getElementById("output").innerText = "Default Address: " + data.address;
+  }
+
+  async function publishProduct() {
+    const productId = document.getElementById("product-id").value;
+    const productDetails = document.getElementById("product-details").value;
+
+    if (!productId || !productDetails) {
+      alert("Please enter both Product ID and Product Details.");
+      return;
+    }
+
+    const response = await fetch("http://localhost:3000/publish", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ productId, details: productDetails })
+    });
+
+    const result = await response.json();
+    document.getElementById("output").innerText = result.message || result.error;
+  }
+
+  async function fetchStreamItems() {
+    const res = await fetch("http://localhost:3000/fetch");
+    const data = await res.json();
+
+    let html = "<ul>";
+    data.forEach(item => {
+      html += `<li><strong>${item.key}</strong>: ${item.data}<br><small>TX: ${item.txid}</small></li>`;
+    });
+    html += "</ul>";
+
+    document.getElementById("output").innerHTML = html;
+  }
+</script>
+
+</body>
+</html>
