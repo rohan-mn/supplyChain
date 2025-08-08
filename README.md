@@ -89,3 +89,5 @@ curl -X POST http://localhost:3000/publish \
   }
 ]
 ```
+
+python3 http.server 8000
